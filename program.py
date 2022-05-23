@@ -5,6 +5,10 @@ import busio
 import digitalio
 import board
 from adafruit_bus_device.spi_device import SPIDevice
+import requests 
+
+url = "http://tibedk1.hub.ubeac.io/projectiot"  #ubeac link om te uploaden
+uid = "raspivantibe"                            #ubeac Unique IDs
  
 # Start SPI op
 spi = busio.SPI(board.SCK, MOSI=board.MOSI, MISO=board.MISO)
@@ -31,8 +35,22 @@ def lees(sensor):
     else: 
         return -1
 
+def stuurData(temp, gew):
+    data = {                                            #Pak alle data in om te versturen
+		"id": uid,
+		"sensors":[{
+			'id': 'adc kanaal0',
+			'data': temp
+			}, {
+            'id': 'adc kanaal1',
+			'data': gew
+            }]}
+    requests.post(url, verify=False,  json=data)        #Verstuur deze data door een http request
+
 while True:
 	temperatuur = lees("temp")
 	gewicht = lees("weight")
+
+    	stuurData(temperatuur, gewicht)
 
 	time.sleep(0.2)
